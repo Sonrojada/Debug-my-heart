@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Heart, Code, Terminal, Sparkles, Cat, Award, Download } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Heart, Code, Terminal, Sparkles, Cat } from 'lucide-react';
 
 const DebugMyHeartGame = () => {
   const [gameState, setGameState] = useState('intro');
@@ -12,10 +12,6 @@ const DebugMyHeartGame = () => {
   const [userInput, setUserInput] = useState('');
   const [attempts, setAttempts] = useState(0);
   const [showHelpOffer, setShowHelpOffer] = useState(false);
-  const [candleLit, setCandleLit] = useState(true);
-  const [showCake, setShowCake] = useState(false);
-  const [secretClicks, setSecretClicks] = useState(0);
-  const audioContextRef = useRef(null);
 
   // Oye Dani, si estás leyendo esto en el código significa que eres tan curiosa como pensaba jajaja
   // Este juego lo hice con ayuda de una IA porque soy un desastre programando, pero el amor es 100% mío
@@ -26,21 +22,19 @@ const DebugMyHeartGame = () => {
       title: "Bug #1: Error de Inicialización",
       code: `function iniciarDia() {
   let felicidad = 0;
-  let amor = Infinity;
-  return \`Felicidad: \${felicidad}, Amor: \${amor}\`;
-}
-iniciarDia();`,
+  let amor = undefined;
+  return felicidad + amor;
+}`,
       solution: "Infinity",
       hint: "El amor nunca debería ser undefined... ¿qué tal algo infinito? (=^･ω･^=)",
       message: "Cada día contigo es un regalo. Gracias por existir, preciosa.",
     },
     {
       title: "Bug #2: Loop Infinito Detectado", 
-      code: `function pensarEnTi() {
-  while (true) {
-    console.log("Pensando en Dani...");
-    sonreir();
-  }
+      code: `while (true) {
+  pensar_en_ti();
+  sonreir();
+  break;
 }`,
       solution: "infinito",
       hint: "¿Y si algunos loops infinitos son... perfectos tal como están? (=´ω｀=)",
@@ -48,14 +42,11 @@ iniciarDia();`,
     },
     {
       title: "Bug #3: Excepción no Controlada",
-      code: `function celebrarCumpleaños() {
-  try {
-    const regalo = "amor verdadero";
-    darAbrazos();
-    return regalo;
-  } catch (error) {
-    console.error("Error:", error);
-  }
+      code: `try {
+  celebrar_cumpleaños();
+  dar_abrazos();
+} catch (error) {
+  console.log("Error: falta algo...");
 }`,
       solution: "amor",
       hint: "Los mejores regalos vienen del corazón... (=^-ω-^=)",
@@ -63,14 +54,10 @@ iniciarDia();`,
     },
     {
       title: "Bug #4: Return Statement Incorrecto",
-      code: `function futuroJuntas() {
-  const aventuras = [];
-  const recuerdos = [];
-  return {
-    aventuras: Infinity,
-    recuerdos: Infinity,
-    amor: Infinity
-  };
+      code: `function futuro_juntas() {
+  let aventuras = [];
+  let recuerdos = [];
+  return null;
 }`,
       solution: "todo",
       hint: "El futuro tiene espacio para todo lo infinito... (=ＴェＴ=)",
@@ -168,122 +155,6 @@ iniciarDia();`,
     }
     setShowCatMenu(false);
     setTimeout(() => setCatDialogue(null), 4000);
-  };
-
-  const handleSecretClick = () => {
-    const newClicks = secretClicks + 1;
-    setSecretClicks(newClicks);
-    if (newClicks === 3) {
-      setGlitchEffect(true);
-      setTimeout(() => {
-        setGlitchEffect(false);
-        setShowCake(true);
-        setSecretClicks(0);
-      }, 500);
-    }
-  };
-
-  useEffect(() => {
-    if (showCake && candleLit) {
-      startMicrophoneDetection();
-    }
-    return () => {
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-      }
-    };
-  }, [showCake, candleLit]);
-
-  const startMicrophoneDetection = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      const analyser = audioContextRef.current.createAnalyser();
-      const microphone = audioContextRef.current.createMediaStreamSource(stream);
-      const dataArray = new Uint8Array(analyser.frequencyBinCount);
-      
-      microphone.connect(analyser);
-      analyser.fftSize = 256;
-
-      const checkBlowing = () => {
-        analyser.getByteFrequencyData(dataArray);
-        const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-        
-        if (average > 50 && candleLit) {
-          setCandleLit(false);
-          stream.getTracks().forEach(track => track.stop());
-          if (audioContextRef.current) {
-            audioContextRef.current.close();
-          }
-        } else if (candleLit) {
-          requestAnimationFrame(checkBlowing);
-        }
-      };
-      
-      checkBlowing();
-    } catch (error) {
-      console.log("Micrófono no disponible");
-    }
-  };
-
-  const downloadCertificate = () => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1200;
-    canvas.height = 800;
-    const ctx = canvas.getContext('2d');
-
-    // Fondo
-    const gradient = ctx.createLinearGradient(0, 0, 1200, 800);
-    gradient.addColorStop(0, '#000000');
-    gradient.addColorStop(0.5, '#0e7490');
-    gradient.addColorStop(1, '#000000');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, 1200, 800);
-
-    // Borde
-    ctx.strokeStyle = '#22d3ee';
-    ctx.lineWidth = 8;
-    ctx.strokeRect(40, 40, 1120, 720);
-
-    // Título
-    ctx.fillStyle = '#22d3ee';
-    ctx.font = 'bold 60px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText('CERTIFICADO DE DEBUG', 600, 150);
-
-    // Texto principal
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '32px Arial';
-    ctx.fillText('Se certifica que', 600, 250);
-    
-    ctx.fillStyle = '#22d3ee';
-    ctx.font = 'bold 48px Arial';
-    ctx.fillText('DANIELA', 600, 320);
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = '28px Arial';
-    ctx.fillText('ha completado exitosamente', 600, 380);
-    ctx.fillText('"Debug My Heart"', 600, 420);
-    ctx.fillText('demostrando habilidades excepcionales', 600, 460);
-    ctx.fillText('en debugging y siendo increíblemente inteligente', 600, 500);
-
-    // Fecha
-    ctx.fillStyle = '#a5f3fc';
-    ctx.font = '24px Arial';
-    ctx.fillText('8 de Enero, 2026', 600, 580);
-
-    // Firma
-    ctx.fillStyle = '#22d3ee';
-    ctx.font = 'italic 28px Arial';
-    ctx.fillText('Con todo mi amor,', 600, 650);
-    ctx.font = 'bold 32px Arial';
-    ctx.fillText('Sandra - Tu novia no novia', 600, 690);
-
-    // Descargar
-    const link = document.createElement('a');
-    link.download = 'certificado-daniela.png';
-    link.href = canvas.toDataURL();
-    link.click();
   };
 
   const IntroScreen = () => (
@@ -440,7 +311,7 @@ iniciarDia();`,
                   <div className="absolute top-16 right-0 bg-black/95 border-2 border-yellow-400 rounded-lg p-4 w-72 shadow-[0_0_35px_rgba(250,204,21,0.6)]">
                     <div className="flex items-start gap-2 mb-3">
                       <Cat className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1" />
-                      <p className="text-yellow-300 text-sm">¿Necesitas ayuda? (･ω･)?</p>
+                      <p className="text-yellow-200 text-sm">¿Necesitas ayuda? (･ω･)?</p>
                     </div>
                     <div className="space-y-2">
                       <button
@@ -497,11 +368,7 @@ iniciarDia();`,
                   type="text"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      handleSubmit();
-                    }
-                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
                   placeholder="Escribe tu solución aquí..."
                   className="w-full bg-gray-950 border-2 border-cyan-500/50 rounded px-4 py-3 text-cyan-300 placeholder-cyan-900/50 focus:border-cyan-400 focus:outline-none focus:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition"
                 />
@@ -546,265 +413,6 @@ iniciarDia();`,
 
   // Eres el mejor "bug" que nunca quiero arreglar en mi vida <3
 
-  const CakeScreen = () => (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-8 relative overflow-hidden">
-      <style>{`
-        .cake-container {
-          position: relative;
-          width: 250px;
-          height: 300px;
-          margin: 0 auto;
-        }
-
-        .plate {
-          width: 270px;
-          height: 110px;
-          position: absolute;
-          bottom: -10px;
-          left: -10px;
-          background-color: #ccc;
-          border-radius: 50%;
-          box-shadow:
-            0 2px 0 #999,
-            0 4px 0 #999,
-            0 5px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .layer {
-          position: absolute;
-          display: block;
-          width: 250px;
-          height: 100px;
-          border-radius: 50%;
-          background-color: #553c13;
-          box-shadow:
-            0 2px 0px #5d4419,
-            0 4px 0px #4a3110,
-            0 6px 0px #4a300f,
-            0 8px 0px #49300e,
-            0 10px 0px #492f0d,
-            0 12px 0px #482f0c,
-            0 14px 0px #482e0b,
-            0 16px 0px #472e0a,
-            0 18px 0px #472e09,
-            0 20px 0px #462d08,
-            0 22px 0px #462d07,
-            0 24px 0px #452d06,
-            0 26px 0px #452c05,
-            0 28px 0px #442c04,
-            0 30px 0px #442c03;
-        }
-
-        .layer-top { top: 0px; }
-        .layer-middle { top: 33px; }
-        .layer-bottom { top: 66px; }
-
-        .icing {
-          position: absolute;
-          top: 2px;
-          left: 5px;
-          background-color: #f0e4d0;
-          width: 240px;
-          height: 90px;
-          border-radius: 50%;
-          z-index: 1;
-        }
-
-        .icing:before {
-          content: "";
-          position: absolute;
-          top: 4px;
-          right: 5px;
-          bottom: 6px;
-          left: 5px;
-          background-color: #f5ebd7;
-          box-shadow:
-            0 0 4px #faf2e4,
-            0 0 4px #faf2e4,
-            0 0 4px #faf2e4;
-          border-radius: 50%;
-          z-index: 1;
-        }
-
-        .drip {
-          display: block;
-          width: 50px;
-          height: 60px;
-          border-bottom-left-radius: 25px;
-          border-bottom-right-radius: 25px;
-          background-color: #f0e4d0;
-          position: absolute;
-          z-index: 2;
-        }
-
-        .drip1 {
-          top: 53px;
-          left: 5px;
-          transform: skewY(15deg);
-          height: 48px;
-          width: 40px;
-        }
-
-        .drip2 {
-          top: 69px;
-          left: 181px;
-          transform: skewY(-15deg);
-        }
-
-        .drip3 {
-          top: 54px;
-          left: 90px;
-          width: 80px;
-          border-bottom-left-radius: 40px;
-          border-bottom-right-radius: 40px;
-        }
-
-        .candle {
-          background-color: #7B020B;
-          width: 16px;
-          height: 50px;
-          border-radius: 8px / 4px;
-          position: absolute;
-          top: -20px;
-          left: 50%;
-          margin-left: -8px;
-          z-index: 10;
-        }
-
-        .candle:before {
-          content: "";
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 16px;
-          height: 8px;
-          border-radius: 50%;
-          background-color: #8f0c16;
-        }
-
-        .flame {
-          position: absolute;
-          background-color: orange;
-          width: 15px;
-          height: 35px;
-          border-radius: 10px 10px 10px 10px / 25px 25px 10px 10px;
-          top: -34px;
-          left: 50%;
-          margin-left: -7.5px;
-          z-index: 10;
-          box-shadow:
-            0 0 10px rgba(255, 165, 0, 0.5),
-            0 0 20px rgba(255, 165, 0, 0.5),
-            0 0 60px rgba(255, 165, 0, 0.5),
-            0 0 80px rgba(255, 165, 0, 0.5);
-          transform-origin: 50% 90%;
-          animation: flicker 1s ease-in-out alternate infinite;
-        }
-
-        .flame.blown-out {
-          display: none;
-        }
-
-        @keyframes flicker {
-          0% {
-            transform: skewX(5deg);
-            box-shadow: 
-              0 0 10px rgba(255, 165, 0, 0.2),
-              0 0 20px rgba(255, 165, 0, 0.2),
-              0 0 60px rgba(255, 165, 0, 0.2),
-              0 0 80px rgba(255, 165, 0, 0.2);
-          }
-          25% {
-            transform: skewX(-5deg);
-            box-shadow:
-              0 0 10px rgba(255, 165, 0, 0.5),
-              0 0 20px rgba(255, 165, 0, 0.5),
-              0 0 60px rgba(255, 165, 0, 0.5),
-              0 0 80px rgba(255, 165, 0, 0.5);
-          }
-          50% {
-            transform: skewX(10deg);
-            box-shadow:
-              0 0 10px rgba(255, 165, 0, 0.3),
-              0 0 20px rgba(255, 165, 0, 0.3),
-              0 0 60px rgba(255, 165, 0, 0.3),
-              0 0 80px rgba(255, 165, 0, 0.3);
-          }
-          75% {
-            transform: skewX(-10deg);
-            box-shadow:
-              0 0 10px rgba(255, 165, 0, 0.4),
-              0 0 20px rgba(255, 165, 0, 0.4),
-              0 0 60px rgba(255, 165, 0, 0.4),
-              0 0 80px rgba(255, 165, 0, 0.4);
-          }
-          100% {
-            transform: skewX(5deg);
-            box-shadow:
-              0 0 10px rgba(255, 165, 0, 0.5),
-              0 0 20px rgba(255, 165, 0, 0.5),
-              0 0 60px rgba(255, 165, 0, 0.5),
-              0 0 80px rgba(255, 165, 0, 0.5);
-          }
-        }
-      `}</style>
-
-      <div className="absolute inset-0 bg-black"></div>
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-cyan-500 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-pink-500 rounded-full blur-3xl animate-pulse"></div>
-      </div>
-
-      <div className="relative z-10 max-w-3xl text-center">
-        {candleLit ? (
-          <>
-            <h1 className="text-5xl font-bold mb-8 text-cyan-400 drop-shadow-[0_0_20px_rgba(34,211,238,0.8)]">
-              ¡Pide un deseo! 
-            </h1>
-            <div className="cake-container mb-8">
-              <div className="plate"></div>
-              <div className="layer layer-bottom"></div>
-              <div className="layer layer-middle"></div>
-              <div className="layer layer-top"></div>
-              <div className="icing"></div>
-              <div className="drip drip1"></div>
-              <div className="drip drip2"></div>
-              <div className="drip drip3"></div>
-              <div className="candle">
-                <div className={`flame ${!candleLit ? 'blown-out' : ''}`}></div>
-              </div>
-            </div>
-            <p className="text-2xl text-cyan-300 mb-4 drop-shadow-[0_0_10px_rgba(103,232,249,0.6)]">
-              Soplaaaaaaaaa
-            </p>
-            <p className="text-sm text-gray-400">
-              (Todos los días son tu cumple)
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="mb-8">
-              <Sparkles className="w-32 h-32 mx-auto text-cyan-400 animate-pulse drop-shadow-[0_0_40px_rgba(34,211,238,0.8)]" />
-            </div>
-            <h1 className="text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-pink-400 drop-shadow-[0_0_30px_rgba(34,211,238,0.6)]">
-              ¡Feliz Cumpleaños!
-            </h1>
-            <p className="text-2xl text-cyan-300 mb-8">
-              Tu deseo está en camino... :O 
-            </p>
-            <button
-              onClick={downloadCertificate}
-              className="bg-gradient-to-r from-cyan-600 to-pink-600 hover:from-cyan-700 hover:to-pink-700 text-white font-bold py-4 px-8 rounded-lg text-xl transition-all transform hover:scale-105 shadow-[0_0_30px_rgba(34,211,238,0.6)] flex items-center gap-3 mx-auto"
-            >
-              <Download className="w-6 h-6" />
-              Descargar Certificado
-            </button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-
   const FinaleScreen = () => (
     <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white p-8 relative overflow-hidden">
       <div className="absolute inset-0 bg-black"></div>
@@ -845,23 +453,13 @@ FELICES 19 PRECIOSAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 
           <div className="flex items-center justify-center gap-3 mb-4">
             <Cat className="w-8 h-8 text-cyan-400 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)]" />
-            <p className="text-cyan-300 italic">Misión completada con éxito! (=^･ω･^=)</p>
+            <p className="text-cyan-300 italic">¡Misión completada con éxito! (=^･ω･^=)</p>
           </div>
           
           <p className="text-2xl text-cyan-400 font-bold mt-6 drop-shadow-[0_0_10px_rgba(34,211,238,0.6)]">
             Con todo mi amor,
           </p>
-          <p 
-            className="text-cyan-300 mt-2 text-xl drop-shadow-[0_0_10px_rgba(103,232,249,0.6)] cursor-pointer hover:text-cyan-200 transition"
-            onClick={handleSecretClick}
-          >
-            Tu novia no novia - Sandra :3
-          </p>
-          {secretClicks > 0 && secretClicks < 3 && (
-            <p className="text-xs text-gray-500 mt-2">
-              {3 - secretClicks} clicks más...
-            </p>
-          )}
+          <p className="text-cyan-300 mt-2 text-xl drop-shadow-[0_0_10px_rgba(103,232,249,0.6)]">Tu novia no novia - Sandra</p>
         </div>
 
         <button
@@ -872,9 +470,6 @@ FELICES 19 PRECIOSAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
             setUserInput('');
             setAttempts(0);
             setCatDialogue(null);
-            setShowCake(false);
-            setCandleLit(true);
-            setSecretClicks(0);
           }}
           className="bg-gradient-to-r from-cyan-600 to-green-600 hover:from-cyan-700 hover:to-green-700 text-white font-bold py-3 px-8 rounded-lg transition-all transform hover:scale-105 shadow-[0_0_20px_rgba(34,211,238,0.5)]"
         >
@@ -885,10 +480,6 @@ FELICES 19 PRECIOSAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
   );
 
   // return true; porque tú siempre serás mi respuesta correcta
-
-  if (showCake) {
-    return <CakeScreen />;
-  }
 
   return (
     <div className="font-sans">
